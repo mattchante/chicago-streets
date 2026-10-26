@@ -11,13 +11,13 @@ npm install
 npm run dev          # local dev server with hot reload, usually http://localhost:5173
 ```
 
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | Dev server. The debug hook `window.__g` is available in the console. |
-| `npm run build` | Production build to `dist/` (what GitHub Pages serves). |
-| `npm run build:single` | One self-contained `dist-single/index.html` (everything inlined), handy for sharing a single file or a Claude artifact. |
-| `npm run preview` | Serves `dist/` locally to check a production build. |
-| `npm run smoke` | Headless smoke test of `dist/`: loads the game, visits six landmarks, drives the SUV, writes screenshots to `smoke-output/`, fails on any page error. Run `npm run build` first, and once per machine `npx playwright install chromium`. |
+| Script                 | What it does                                                                                                                                                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`          | Dev server. The debug hook `window.__g` is available in the console.                                                                                                                                                                     |
+| `npm run build`        | Production build to `dist/` (what GitHub Pages serves).                                                                                                                                                                                  |
+| `npm run build:single` | One self-contained `dist-single/index.html` (everything inlined), handy for sharing a single file or a Claude artifact.                                                                                                                  |
+| `npm run preview`      | Serves `dist/` locally to check a production build.                                                                                                                                                                                      |
+| `npm run smoke`        | Headless smoke test of `dist/`: loads the game, visits six landmarks, drives the SUV, writes screenshots to `smoke-output/`, fails on any page error. Run `npm run build` first, and once per machine `npx playwright install chromium`. |
 
 ## Controls
 
@@ -65,7 +65,7 @@ scripts/smoke.mjs       headless smoke test
 
 - **Units and axes:** metres; x = east, z = south, y = up; the origin is the centre of Cloud Gate.
 - **Load order matters.** Each world module builds its part of the scene when it loads, and many add geometry to shared batches (`acc(...)` in `core/geometry.js`) that `world/finalize.js` merges into a few meshes. New modules go into the import list at the top of `src/main.js`, before `world/finalize.js` if they add batched geometry.
-- **Shared state:** values several modules write (camera angles, run flags, timers) live on `state` in `core/state.js`. Objects and functions a module needs from a module that loads *later* (for example traffic needs the player) are read through `late`, which the later module fills in. Only read `late.*` at runtime, never while a module is loading.
+- **Shared state:** values several modules write (camera angles, run flags, timers) live on `state` in `core/state.js`. Objects and functions a module needs from a module that loads _later_ (for example traffic needs the player) are read through `late`, which the later module fills in. Only read `late.*` at runtime, never while a module is loading.
 - **Collision** is a uniform grid of simple shapes (`colRect`, `colCirc`, `colPath` in `core/collision.js`); anything solid needs one.
 
 ## Deploying

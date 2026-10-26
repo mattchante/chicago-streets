@@ -58,32 +58,128 @@ import { updateHUD } from './ui/hud.js';
 import { LANDMARKS, drawMini, teleport } from './ui/maps.js';
 
 /* ============================================================ LOOP */
-const clock=new T.Clock();state.lastMph=-1;state.frame=0;state.fpsT=0;state.fpsN=0;state.simT=0;state.running=false;
-function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}
-addEventListener('resize',resize);
-function tick(){
-  const dt=Math.min(.05,clock.getDelta());state.simT+=dt;state.frame++;
-  if(state.running&&$('map').hidden){if(suv.on)updateSUV(dt);else stepPlayer(dt);}
-  if(suv.on){const m=Math.round(Math.abs(suv.v)*2.237);if(m!==state.lastMph){state.lastMph=m;$('mph').textContent=m;}}
-  if(state.toastT>0){state.toastT-=dt;if(state.toastT<=.4)$('toast').style.opacity=Math.max(0,state.toastT/.4);if(state.toastT<=0)$('toast').hidden=true;}
-  P3.position.set(player.x,player.y,player.z);P3.rotation.y=player.face;animatePlayer(dt);
-  updateCars(dt,state.simT);updateCrowd(dt,state.simT);updateDogs(dt,state.simT);updateLake(dt,state.simT);updateStore(dt);updateCrown(dt,state.simT);updateSignals(state.simT);
-  if(!window.__fc)updateCamera(dt);else{camera.position.set(...window.__fc[0]);camera.lookAt(...window.__fc[1]);}updateSun();sky.position.copy(camera.position);
-  renderer.shadowMap.needsUpdate=true;
-  renderer.render(scene,camera);
+const clock = new T.Clock();
+state.lastMph = -1;
+state.frame = 0;
+state.fpsT = 0;
+state.fpsN = 0;
+state.simT = 0;
+state.running = false;
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+function tick() {
+  const dt = Math.min(0.05, clock.getDelta());
+  state.simT += dt;
+  state.frame++;
+  if (state.running && $('map').hidden) {
+    if (suv.on) updateSUV(dt);
+    else stepPlayer(dt);
+  }
+  if (suv.on) {
+    const m = Math.round(Math.abs(suv.v) * 2.237);
+    if (m !== state.lastMph) {
+      state.lastMph = m;
+      $('mph').textContent = m;
+    }
+  }
+  if (state.toastT > 0) {
+    state.toastT -= dt;
+    if (state.toastT <= 0.4) $('toast').style.opacity = Math.max(0, state.toastT / 0.4);
+    if (state.toastT <= 0) $('toast').hidden = true;
+  }
+  P3.position.set(player.x, player.y, player.z);
+  P3.rotation.y = player.face;
+  animatePlayer(dt);
+  updateCars(dt, state.simT);
+  updateCrowd(dt, state.simT);
+  updateDogs(dt, state.simT);
+  updateLake(dt, state.simT);
+  updateStore(dt);
+  updateCrown(dt, state.simT);
+  updateSignals(state.simT);
+  if (!window.__fc) updateCamera(dt);
+  else {
+    camera.position.set(...window.__fc[0]);
+    camera.lookAt(...window.__fc[1]);
+  }
+  updateSun();
+  sky.position.copy(camera.position);
+  renderer.shadowMap.needsUpdate = true;
+  renderer.render(scene, camera);
   // live reflections on Cloud Gate when nearby
-  const dB=Math.hypot(player.x,player.z);
-  if(dB<160&&state.frame%(LITE?40:4)===0){BEAN.visible=false;beanCam.update(renderer,scene);BEAN.visible=true;}
-  if(state.frame%2===0)drawMini();
+  const dB = Math.hypot(player.x, player.z);
+  if (dB < 160 && state.frame % (LITE ? 40 : 4) === 0) {
+    BEAN.visible = false;
+    beanCam.update(renderer, scene);
+    BEAN.visible = true;
+  }
+  if (state.frame % 2 === 0) drawMini();
   updateHUD(dt);
-  state.fpsN++;state.fpsT+=dt;if(state.fpsT>1){$('fps').textContent=Math.round(state.fpsN/state.fpsT)+' fps';state.fpsN=0;state.fpsT=0;}
+  state.fpsN++;
+  state.fpsT += dt;
+  if (state.fpsT > 1) {
+    $('fps').textContent = Math.round(state.fpsN / state.fpsT) + ' fps';
+    state.fpsN = 0;
+    state.fpsT = 0;
+  }
   requestAnimationFrame(tick);
 }
 teleport(LANDMARKS[1]);
 // first reflection capture + start
-renderer.shadowMap.needsUpdate=true;beanCam.update(renderer,scene);
+renderer.shadowMap.needsUpdate = true;
+beanCam.update(renderer, scene);
 requestAnimationFrame(tick);
-$('play').disabled=false;$('play').textContent='Start walking';
-$('play').addEventListener('click',()=>{$('intro').hidden=true;state.running=true;toast('Your black SUV is parked on the plaza. Press <b>TAB</b> to drive.',7);if(!state.touchMode&&cv.requestPointerLock){try{const p=cv.requestPointerLock();if(p&&p.catch)p.catch(()=>{});}catch(e){}}});
+$('play').disabled = false;
+$('play').textContent = 'Start walking';
+$('play').addEventListener('click', () => {
+  $('intro').hidden = true;
+  state.running = true;
+  toast('Your black SUV is parked on the plaza. Press <b>TAB</b> to drive.', 7);
+  if (!state.touchMode && cv.requestPointerLock) {
+    try {
+      const p = cv.requestPointerLock();
+      if (p && p.catch) p.catch(() => {});
+    } catch (e) {}
+  }
+});
 // Debug/test hook: available in `npm run dev`, or on any build with ?debug in the URL.
-if(import.meta.env.DEV||new URLSearchParams(location.search).has('debug'))window.__g={SUVG,camera,suv,toggleDrive,simDrive:(sec)=>{for(let t=0;t<sec;t+=1/60)updateSUV(1/60);},P3,DOGS,BLANKETS,sim:(sec)=>{for(let t=0;t<sec;t+=1/60)stepPlayer(1/60);},MAT,TX,ENV,player,teleport,LANDMARKS,setCam:(y,p,d)=>{state.camYaw=y;state.camPitch=p;state.camDist=d;},start:()=>{$('intro').hidden=true;state.running=true;},keys,CARS,support,renderer,scene};
+if (import.meta.env.DEV || new URLSearchParams(location.search).has('debug'))
+  window.__g = {
+    SUVG,
+    camera,
+    suv,
+    toggleDrive,
+    simDrive: (sec) => {
+      for (let t = 0; t < sec; t += 1 / 60) updateSUV(1 / 60);
+    },
+    P3,
+    DOGS,
+    BLANKETS,
+    sim: (sec) => {
+      for (let t = 0; t < sec; t += 1 / 60) stepPlayer(1 / 60);
+    },
+    MAT,
+    TX,
+    ENV,
+    player,
+    teleport,
+    LANDMARKS,
+    setCam: (y, p, d) => {
+      state.camYaw = y;
+      state.camPitch = p;
+      state.camDist = d;
+    },
+    start: () => {
+      $('intro').hidden = true;
+      state.running = true;
+    },
+    keys,
+    CARS,
+    support,
+    renderer,
+    scene,
+  };

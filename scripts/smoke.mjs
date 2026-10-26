@@ -18,15 +18,28 @@ const SHOTS = [
 fs.mkdirSync('smoke-output', { recursive: true });
 const server = await preview({ preview: { port: 4179, strictPort: true }, logLevel: 'error' });
 const url = 'http://localhost:4179/?debug';
-const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
+const browser = await chromium.launch({
+  args: [
+    '--use-gl=angle',
+    '--use-angle=swiftshader',
+    '--enable-unsafe-swiftshader',
+    '--ignore-gpu-blocklist',
+  ],
+});
 const page = await browser.newPage({ viewport: { width: 1100, height: 640 } });
 page.setDefaultTimeout(240_000);
-await page.addInitScript(() => { window.__lite = true; }); // low-res, fewer reflection updates for software rendering
+await page.addInitScript(() => {
+  window.__lite = true;
+}); // low-res, fewer reflection updates for software rendering
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
-page.on('console', (m) => { if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text()); });
+page.on('console', (m) => {
+  if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text());
+});
 // Network failures count, except the optional web fonts (offline machines and sandboxes fall back to system fonts).
-page.on('requestfailed', (r) => { if (!/fonts\.(googleapis|gstatic)\.com/.test(r.url())) errors.push(`request failed: ${r.url()}`); });
+page.on('requestfailed', (r) => {
+  if (!/fonts\.(googleapis|gstatic)\.com/.test(r.url())) errors.push(`request failed: ${r.url()}`);
+});
 
 let failed = false;
 try {
@@ -36,26 +49,50 @@ try {
   console.log(`loaded in ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   await page.evaluate(() => window.__g.start());
   for (const s of SHOTS) {
-    await page.evaluate((s) => { const g = window.__g; g.teleport({ x: s.x, z: s.z, yaw: s.yaw }); g.setCam(s.yaw, s.pitch ?? 0.16, s.dist ?? 5.6); }, s);
+    await page.evaluate((s) => {
+      const g = window.__g;
+      g.teleport({ x: s.x, z: s.z, yaw: s.yaw });
+      g.setCam(s.yaw, s.pitch ?? 0.16, s.dist ?? 5.6);
+    }, s);
     // wait for real frames (software rendering can be slow), so the HUD and shadows catch up
-    await page.evaluate(() => new Promise((res) => { let n = 0; const f = () => (++n >= 12 ? res() : requestAnimationFrame(f)); requestAnimationFrame(f); }));
+    await page.evaluate(
+      () =>
+        new Promise((res) => {
+          let n = 0;
+          const f = () => (++n >= 12 ? res() : requestAnimationFrame(f));
+          requestAnimationFrame(f);
+        }),
+    );
     const place = await page.evaluate(() => document.getElementById('place').textContent);
     await page.screenshot({ path: `smoke-output/${s.name}.png` });
     console.log(`  ${s.name.padEnd(22)} -> ${place}`);
   }
   // SUV: get in, accelerate for 3 s of simulated time, get out
   const drive = await page.evaluate(() => {
-    const g = window.__g; g.teleport({ x: -62, z: -44, yaw: Math.PI }); g.toggleDrive();
-    g.keys.KeyW = true; g.simDrive(3); g.keys.KeyW = false;
-    const mph = Math.abs(g.suv.v) * 2.237; const on = g.suv.on; g.toggleDrive();
+    const g = window.__g;
+    g.teleport({ x: -62, z: -44, yaw: Math.PI });
+    g.toggleDrive();
+    g.keys.KeyW = true;
+    g.simDrive(3);
+    g.keys.KeyW = false;
+    const mph = Math.abs(g.suv.v) * 2.237;
+    const on = g.suv.on;
+    g.toggleDrive();
     return { on, mph: Math.round(mph), out: !g.suv.on };
   });
   console.log(`  suv: entered=${drive.on} speed after 3 s=${drive.mph} mph exited=${drive.out}`);
-  if (!drive.on || drive.mph < 20 || !drive.out) { failed = true; console.error('SUV check failed'); }
+  if (!drive.on || drive.mph < 20 || !drive.out) {
+    failed = true;
+    console.error('SUV check failed');
+  }
 } catch (e) {
-  failed = true; console.error(e);
+  failed = true;
+  console.error(e);
 }
-if (errors.length) { failed = true; console.error('Page errors:\n  ' + errors.join('\n  ')); }
+if (errors.length) {
+  failed = true;
+  console.error('Page errors:\n  ' + errors.join('\n  '));
+}
 await browser.close();
 await new Promise((r) => server.httpServer.close(r));
 console.log(failed ? 'SMOKE TEST FAILED' : 'smoke test passed');

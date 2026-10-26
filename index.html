@@ -1,54 +1,82 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Millennium Park 3D</title>
-<meta name="description" content="A third-person, 1:1 recreation of Cloud Gate, Millennium Park and the Chicago lakefront.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Archivo:wght@400;600&display=swap">
-</head>
-<body>
-<div id="app"></div>
-<div class="hud" id="loc"><div class="place" id="place">Millennium Park</div><div class="street" id="street">Chicago Loop</div></div>
-<div class="hud" id="compass"><span>HEADING</span><span class="hd" id="hd">E</span><span class="fps" id="fps"></span></div>
-<div class="hud" id="mini"><canvas id="minic" width="400" height="400"></canvas></div>
-<div class="hud" id="speedo" hidden><span class="n" id="mph">0</span><span class="u">MPH</span><span class="k">TAB exit · SPACE handbrake · SHIFT boost</span></div>
-<div class="hud" id="toast" hidden></div>
-<div class="hud" id="keys">
-  <div><b>W A S D</b> walk</div><div><b>SHIFT</b> run</div><div><b>SPACE</b> jump</div>
-  <div><b>MOUSE</b> look &nbsp;<b>WHEEL</b> zoom</div><div><b>TAB</b> drive the SUV</div><div><b>M</b> map + fast travel</div><div><b>H</b> hide help</div>
-</div>
-<div id="touch" hidden><div id="stick"><div id="nub"></div></div><div id="tbtns"><button id="tjump" type="button">JUMP</button><button id="trun" type="button">RUN</button><button id="tcar" type="button">CAR</button><button id="tmap" type="button">MAP</button></div></div>
-
-<div id="map" hidden>
-  <canvas id="bigmap" width="900" height="870"></canvas>
-  <div class="side">
-    <h2>Fast travel</h2>
-    <p class="hint">Click a place, or click anywhere on the map. Press M or Esc to close.</p>
-    <div id="ftlist" style="display:flex;flex-direction:column;gap:6px"></div>
-  </div>
-</div>
-
-<div id="intro">
-  <div class="card">
-    <div class="eyebrow">Chicago Loop · 1:1 scale</div>
-    <h1>Millennium Park &amp; Cloud Gate</h1>
-    <p>Walk Michigan Avenue, Grainger Plaza, the Great Lawn, Crown Fountain, Lurie Garden and the BP Bridge at true size. Streets are open and live with traffic signals; buildings are solid with storefronts you can see but not enter.</p>
-    <div class="grid">
-      <b>W A S D</b><span>Move relative to the camera</span>
-      <b>SHIFT</b><span>Run</span>
-      <b>SPACE</b><span>Jump</span>
-      <b>MOUSE</b><span>Look (click to lock the pointer), wheel to zoom</span>
-      <b>TAB</b><span>Get in or out of the black SUV (W/S drive, A/D steer, Space handbrake, Shift boost)</span>
-      <b>M</b><span>City map and fast travel</span>
-      <b>TOUCH</b><span>Left stick to move, drag anywhere to look</span>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Millennium Park 3D</title>
+    <meta
+      name="description"
+      content="A third-person, 1:1 recreation of Cloud Gate, Millennium Park and the Chicago lakefront."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Archivo:wght@400;600&display=swap"
+    />
+  </head>
+  <body>
+    <div id="app"></div>
+    <div class="hud" id="loc">
+      <div class="place" id="place">Millennium Park</div>
+      <div class="street" id="street">Chicago Loop</div>
     </div>
-    <button id="play" type="button" disabled>Building the city…</button>
-    <div id="status"></div>
-  </div>
-</div>
-<script type="module" src="/src/main.js"></script>
-</body>
+    <div class="hud" id="compass">
+      <span>HEADING</span><span class="hd" id="hd">E</span><span class="fps" id="fps"></span>
+    </div>
+    <div class="hud" id="mini"><canvas id="minic" width="400" height="400"></canvas></div>
+    <div class="hud" id="speedo" hidden>
+      <span class="n" id="mph">0</span><span class="u">MPH</span
+      ><span class="k">TAB exit · SPACE handbrake · SHIFT boost</span>
+    </div>
+    <div class="hud" id="toast" hidden></div>
+    <div class="hud" id="keys">
+      <div><b>W A S D</b> walk</div>
+      <div><b>SHIFT</b> run</div>
+      <div><b>SPACE</b> jump</div>
+      <div><b>MOUSE</b> look &nbsp;<b>WHEEL</b> zoom</div>
+      <div><b>TAB</b> drive the SUV</div>
+      <div><b>M</b> map + fast travel</div>
+      <div><b>H</b> hide help</div>
+    </div>
+    <div id="touch" hidden>
+      <div id="stick"><div id="nub"></div></div>
+      <div id="tbtns">
+        <button id="tjump" type="button">JUMP</button><button id="trun" type="button">RUN</button
+        ><button id="tcar" type="button">CAR</button><button id="tmap" type="button">MAP</button>
+      </div>
+    </div>
+
+    <div id="map" hidden>
+      <canvas id="bigmap" width="900" height="870"></canvas>
+      <div class="side">
+        <h2>Fast travel</h2>
+        <p class="hint">Click a place, or click anywhere on the map. Press M or Esc to close.</p>
+        <div id="ftlist" style="display: flex; flex-direction: column; gap: 6px"></div>
+      </div>
+    </div>
+
+    <div id="intro">
+      <div class="card">
+        <div class="eyebrow">Chicago Loop · 1:1 scale</div>
+        <h1>Millennium Park &amp; Cloud Gate</h1>
+        <p>
+          Walk Michigan Avenue, Grainger Plaza, the Great Lawn, Crown Fountain, Lurie Garden and the BP Bridge
+          at true size. Streets are open and live with traffic signals; buildings are solid with storefronts
+          you can see but not enter.
+        </p>
+        <div class="grid">
+          <b>W A S D</b><span>Move relative to the camera</span> <b>SHIFT</b><span>Run</span> <b>SPACE</b
+          ><span>Jump</span> <b>MOUSE</b><span>Look (click to lock the pointer), wheel to zoom</span>
+          <b>TAB</b
+          ><span>Get in or out of the black SUV (W/S drive, A/D steer, Space handbrake, Shift boost)</span>
+          <b>M</b><span>City map and fast travel</span> <b>TOUCH</b
+          ><span>Left stick to move, drag anywhere to look</span>
+        </div>
+        <button id="play" type="button" disabled>Building the city…</button>
+        <div id="status"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
